@@ -1,0 +1,25 @@
+# Python
+venv/
+env/
+.venv/
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+pip-wheel-metadata/
+
+# Robot Framework results
+results/
+.robotcache/
+*.robolog
+log.html
+report.html
+output.xml
+selenium-screenshot-*.png
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/
+*.swp
