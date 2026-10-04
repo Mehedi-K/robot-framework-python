@@ -35,9 +35,21 @@ Fill Checkout Fields
     [Documentation]    Fills in step one's form fields without submitting.
     [Arguments]    ${first_name}    ${last_name}    ${postal_code}
     Wait Until Element Is Visible    ${FIRST_NAME_INPUT}    timeout=${TIMEOUT}
+    Wait Until Keyword Succeeds    3x    0s
+    ...    Type Checkout Fields And Confirm They Held    ${first_name}    ${last_name}    ${postal_code}
+
+Type Checkout Fields And Confirm They Held
+    [Documentation]    Keystrokes sent before the React form finishes wiring its
+    ...    handlers are reset to empty on its next render (seen intermittently
+    ...    on CI with Chrome 154), so re-read the values after a short settle.
+    [Arguments]    ${first_name}    ${last_name}    ${postal_code}
     Input Text    ${FIRST_NAME_INPUT}    ${first_name}
     Input Text    ${LAST_NAME_INPUT}    ${last_name}
     Input Text    ${POSTAL_CODE_INPUT}    ${postal_code}
+    Sleep    0.5s
+    Textfield Value Should Be    ${FIRST_NAME_INPUT}    ${first_name}
+    Textfield Value Should Be    ${LAST_NAME_INPUT}    ${last_name}
+    Textfield Value Should Be    ${POSTAL_CODE_INPUT}    ${postal_code}
 
 Click Continue
     [Documentation]    Clicks Continue on step one without asserting the outcome
