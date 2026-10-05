@@ -35,9 +35,9 @@ Fill Checkout Fields
     [Documentation]    Fills in step one's form fields without submitting.
     [Arguments]    ${first_name}    ${last_name}    ${postal_code}
     Wait Until Element Is Visible    ${FIRST_NAME_INPUT}    timeout=${TIMEOUT}
-    Input Text    ${FIRST_NAME_INPUT}    ${first_name}
-    Input Text    ${LAST_NAME_INPUT}    ${last_name}
-    Input Text    ${POSTAL_CODE_INPUT}    ${postal_code}
+    Input Text Reliably    ${FIRST_NAME_INPUT}    ${first_name}
+    Input Text Reliably    ${LAST_NAME_INPUT}    ${last_name}
+    Input Text Reliably    ${POSTAL_CODE_INPUT}    ${postal_code}
 
 Click Continue
     [Documentation]    Clicks Continue on step one without asserting the outcome

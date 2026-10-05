@@ -26,8 +26,7 @@ Login As
     [Arguments]    ${username}    ${password}
     Wait Until Element Is Visible    ${USERNAME_INPUT}    timeout=${TIMEOUT}
     Wait Until Element Is Enabled    ${USERNAME_INPUT}    timeout=${TIMEOUT}
-    Input Text    ${USERNAME_INPUT}    ${username}
-    Textfield Value Should Be    ${USERNAME_INPUT}    ${username}
+    Input Text Reliably    ${USERNAME_INPUT}    ${username}
     Wait Until Element Is Enabled    ${PASSWORD_INPUT}    timeout=${TIMEOUT}
     Input Password    ${PASSWORD_INPUT}    ${password}
     Click Via Javascript    ${LOGIN_BUTTON}

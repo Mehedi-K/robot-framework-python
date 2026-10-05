@@ -66,6 +66,24 @@ Capture Failure Diagnostics
     ${name}=    Evaluate    re.sub(r'[^A-Za-z0-9-]', '_', $TEST_NAME)    modules=re
     Create File    ${OUTPUT DIR}/${name}_diagnostics.txt    ${report}
 
+Input Text Reliably
+    [Documentation]    Types ${text} into ${locator} natively and confirms it
+    ...    landed. Once saucedemo's page has sat idle, Chrome intermittently
+    ...    drops native key events to it (seen on CI), so a dropped value is
+    ...    set through the input's value setter that React listens to instead.
+    [Arguments]    ${locator}    ${text}
+    Input Text    ${locator}    ${text}
+    ${value}=    Get Value    ${locator}
+    IF    $value != $text
+        Log    Native typing into ${locator} was dropped, setting the value via JavaScript    level=WARN
+        ${element}=    Get WebElement    ${locator}
+        Execute Javascript
+        ...    Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set.call(arguments[0], arguments[1]);
+        ...    arguments[0].dispatchEvent(new Event('input', {bubbles: true}));
+        ...    ARGUMENTS    ${element}    ${text}
+    END
+    Textfield Value Should Be    ${locator}    ${text}
+
 Click Via Javascript
     [Documentation]    Clicks ${locator} by dispatching a native click event
     ...    through JavaScript instead of SeleniumLibrary's coordinate-based
