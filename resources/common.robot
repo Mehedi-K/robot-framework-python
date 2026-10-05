@@ -8,6 +8,7 @@
 
 *** Settings ***
 Library     SeleniumLibrary
+Library     OperatingSystem
 Resource    variables.robot
 
 
@@ -35,11 +36,35 @@ Get Chrome Options
     Call Method    ${options}    add_argument    --disable-gpu
     Call Method    ${options}    add_argument    --disable-notifications
     Call Method    ${options}    add_argument    --disable-infobars
+    Call Method    ${options}    set_capability    goog:loggingPrefs    ${{ {'browser': 'ALL'} }}
     RETURN    ${options}
 
 Close All Browsers And Cleanup
-    [Documentation]    Suite Teardown counterpart to `Open Browser With Options`.
+    [Documentation]    Test Teardown counterpart to `Open Browser With Options`.
+    ...    Captures failure diagnostics before the browser is closed.
+    Run Keyword If Test Failed    Run Keyword And Ignore Error    Capture Failure Diagnostics
     Close All Browsers
+
+Capture Failure Diagnostics
+    [Documentation]    Logs the page state (URL, input values, every loaded
+    ...    resource with its HTTP status) and the browser console, and writes
+    ...    them to a diagnostics file next to the run's log for CI artifacts.
+    ${state}=    Execute Javascript
+    ...    return JSON.stringify({url: location.href, readyState: document.readyState,
+    ...    userAgent: navigator.userAgent,
+    ...    activeElement: document.activeElement && (document.activeElement.id || document.activeElement.tagName),
+    ...    inputs: [...document.querySelectorAll('input')].map(i => ({id: i.id, value: i.value})),
+    ...    errorText: (document.querySelector("[data-test='error']") || {}).textContent || null,
+    ...    resources: performance.getEntriesByType('resource').map(r => ({name: r.name,
+    ...    status: r.responseStatus, bytes: r.transferSize, ms: Math.round(r.duration)}))}, null, 1);
+    ${selenium}=    Get Library Instance    SeleniumLibrary
+    ${console}=    Evaluate
+    ...    "\\n".join(f"{e['level']} {e['message']}" for e in $selenium.driver.get_log('browser'))
+    ${report}=    Catenate    SEPARATOR=\n
+    ...    == Page state ==    ${state}    ${EMPTY}    == Browser console ==    ${console}
+    Log    ${report}    level=WARN
+    ${name}=    Evaluate    re.sub(r'[^A-Za-z0-9-]', '_', $TEST_NAME)    modules=re
+    Create File    ${OUTPUT DIR}/${name}_diagnostics.txt    ${report}
 
 Click Via Javascript
     [Documentation]    Clicks ${locator} by dispatching a native click event

@@ -27,7 +27,18 @@ jobs:
           pip install -r requirements.txt
 
       - name: Run Robot Framework test suite (headless)
+        id: robot
+        continue-on-error: true
         run: robot -d results --variable HEADLESS:True tests/
+
+      # saucedemo's checkout intermittently breaks a whole browser session; give
+      # failed checkout tests one fresh-browser rerun. Other failures stay failed.
+      - name: Rerun failed checkout tests once
+        if: steps.robot.outcome == 'failure'
+        run: |
+          robot -d results --output rerun.xml --log NONE --report NONE --variable HEADLESS:True \
+            --rerunfailed results/output.xml --include checkout --runemptysuite tests/ || true
+          rebot -d results --output output.xml --merge results/output.xml results/rerun.xml
 
       - name: Upload test results
         if: always()
